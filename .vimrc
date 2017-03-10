@@ -17,6 +17,8 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 
 " Colorscheme
 Plug 'flazz/vim-colorschemes'
+Plug 'agude/vim-eldar'
+Plug 'cohlin/vim-colorschemes'
 
 " Auto-Pairs
 Plug 'jiangmiao/auto-pairs'
@@ -29,12 +31,8 @@ Plug 'vim-airline/vim-airline-themes'
 "Plug 'edkolev/tmuxline.vim'
 "Plug 'itchyny/lightline.vim'
 
-" Python Plug
-" Plug 'Valloric/YouCompleteMe'
-" Plug 'davidhalter/jedi-vim'
-
 " Latex Plug
-Plug 'lervag/vimtex'
+Plug 'vim-latex/vim-latex'
 
 " R Plug
 Plug 'jalvesaq/Nvim-R'
@@ -123,6 +121,13 @@ set mat=2
 " Set utf8 as standard encoding language
 set encoding=utf-8
 
+" Enable mouse mode in vim for a tmux-session
+set mouse+=a
+if &term =~ '^screen'
+        " tmux knows the extended mouse mode
+   set ttymouse=xterm2
+endif
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Files, backups and undo
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -188,6 +193,9 @@ map <leader>bd :Bclose<cr>
 map <leader>ba :1,1000 bd!<cr>
 
 
+" Open PDF-Files in Vim
+:command! -complete=file -nargs=1 Rpdf :r !pdftotext -nopgbrk <q-args> -
+:command! -complete=file -nargs=1 Rpdf :r !pdftotext -nopgbrk <q-args> - |fmt -csw78
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => Status line, Powerline (airline)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -199,7 +207,7 @@ let g:airline_powerline_fonts=1
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Colorscheme
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" colorscheme industry
+colorscheme tango
 "let g:airline_theme='dark'
 
 
@@ -219,8 +227,10 @@ nmap <LocalLeader>sr <Plug>RStart
 
 let R_in_buffer = 0
 let R_tmux_split = 1
+let R_save_win_pos = 0
 
-let R_vsplit = 1
+" Vertical Split for R-Console
+"let R_vsplit = 1
 
 " R comment
 let R_rcomment_string = "# "
@@ -229,8 +239,8 @@ let R_rcomment_string = "# "
 let Rout_more_colors = 1
 
 " Send line
-vmap <C-c>> <Plug>RDSendSelection
-nmap <C-c> <Plug>RDSendLine
+vmap <C-r> <Plug>RDSendSelection
+nmap <C-r> <Plug>RDSendLine
 
 " Show arguments
 let R_show_args = 1
@@ -247,4 +257,18 @@ let R_start_libs = "base,stats,graphics,grDevices,utils,methods"
 let R_objbr_opendf = 1    " Show data.frames elements
 let R_objbr_openlist = 0  " Show lists elements
 let R_objbr_allnames = 0  " Show .GlobalEnv hidden objects
-let R_objbr_labelerr = 1  " Warn if label is not a valid text
+
+" Autoload of R
+autocmd FileType r if string(g:SendCmdToR) == "function('SendCmdToR_fake')" | call StartR("R") | endif
+" Autoclose of R
+autocmd VimLeave * if exists("g:SendCmdToR") && string(g:SendCmdToR) != "function('SendCmdToR_fake')" | call RQuit("nosave") | endif
+
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Latex (vim-latex)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Latex compile with pdf
+let g:Tex_DefaultTargetFormat = 'pdf'
+let g:Tex_MultipleCompileFormats='pdf, aux'
+
